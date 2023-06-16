@@ -1,11 +1,84 @@
 ---
-title: "Vignette_1"
+title: "Vignette for reading and summarizing data from API's"
 author: "Demetrios Samaras"
 date: "2023-06-16"
-output: html_document
+output:
+   html_document:
+    toc: TRUE
+    toc_depth: 3
+    toc_float: FALSE
+    code_folding: hide
+    theme: readable
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE)
+
+##api key = DrI5M1TDWji8nJS9aZDfUAdR_6iqhFzm
 ```
+
+# Purpose 
+
+##### The purpose of this Vignette is to summarize how to interact with, pull data and then analyze the data from the polygon.io finacial data API [https://polygon.io](https://polygon.io)
+
+# Required packages 
+
+##### The following packages will be required 
+
+  * **tidyverse**
+    + We will use a number of the functions from the tidyverse
+  * **jsonlite**
+    + This will help up interact with the API
+  * **httr**
+    + for the `GET` function 
+  * **ggplot2**
+    + This will be required to create the data visualizations
+    
+# Steps for querying endpoints  
+
+#### Step 0 
+
+Make sure all of the required packages are installed using the `install.packages()` function and library them using `library()`
+
+```{r library functions, echo=TRUE, eval=TRUE}
+
+library(tidyverse)
+library(jsonlite)
+library(httr)
+library(ggplot2)
+
+```
+
+#### Step 1 Contact the API 
+
+```{r contact , echo = TRUE, eval = FALSE}
+## this is a function to contact the API based on the ticker of interest
+ticker <- function(ticker){
+  
+  link
+  
+ response <-GET("https://api.polygon.io/v2/aggs/ticker/BA/range/1/day/2023-01-09/2023-01-09?adjusted=true&sort=asc&limit=120&apiKey=DrI5M1TDWji8nJS9aZDfUAdR_6iqhFzm")
+
+response
+}
+  
+```
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
 
