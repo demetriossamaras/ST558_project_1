@@ -140,7 +140,7 @@ WhosThatPokemon <- function(pokemon="all", n=1008, info=NULL){
  
  jsondata <- fromJSON(data)  
  ## gives the desired info on this Pokemon 
- data1 <- as_tibble(jsondata[info])
+ data1 <- jsondata[info]
   
  
   }
@@ -150,8 +150,64 @@ WhosThatPokemon <- function(pokemon="all", n=1008, info=NULL){
 
 ```
 
+```{r }
 
-## analysis 
+
+
+
+```
+
+
+
+## EDA analysis 
+
+#### We are going to use the fuctions that we createed to get the heights and weights the pokemon and look at the relationship 
+
+```{r heights weights types  }
+## sets the tibble of first 10 pokemon as a global object 
+test10<- WhosThatPokemon(n=10)
+
+
+## contacts the api to get the heights for the first 10 pokemon
+TenPokeHeights <- sapply(X=test10$name, FUN = WhosThatPokemon, info = "height")
+
+## converts the results to a tibble with the heights as the column
+TenPokeHeights <- unlist(TenPokeHeights) %>% as_tibble()
+names(TenPokeHeights) <- "height"
+
+
+## contacts the api to get the weights for the first 10 pokemon
+TenPokeWeights <- sapply(X=test10$name, FUN = WhosThatPokemon, info = "weight")
+
+## converts result to tibble with weights as the column
+TenPokeWeights <- unlist(TenPokeWeights) %>% as_tibble()
+names(TenPokeWeights) <- "weight"
+
+## contacts the api to get the types for the first 10 pokemon 
+TenPokeTypes <- sapply(X=test10$name, FUN = WhosThatPokemon, info = "types")
+
+TenPokeTypes <- sapply(1:10, FUN = function(i){TenPokeTypes[[i]][[2]][1,1]})
+
+TenPokeTypes<- TenPokeTypes%>% as_tibble()
+
+names(TenPokeTypes) <- "type"
+
+## binds the column of heights and weights to the pokemon 
+PokemonHeightsWeightsTypes <- cbind(test10, TenPokeHeights, TenPokeWeights, TenPokeTypes)
+
+```
+
+```{r heights vs weights scatter, echo=TRUE, eval=TRUE}
+
+g <- ggplot(PokemonHeightsWeightsTypes, aes(x=height, y=weight))
+
+g+geom_point(aes(color=type))
+
+
+
+```
+
+
 
 
 
