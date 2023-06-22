@@ -1733,17 +1733,16 @@ from API’s</h1>
 <li><a href="#purpose" id="toc-purpose">Purpose</a></li>
 <li><a href="#required-packages" id="toc-required-packages">Required
 packages</a></li>
-<li><a href="#steps-for-querying-endpoints" id="toc-steps-for-querying-endpoints">Steps for querying
+<li><a href="#functions-for-querying-endpoints" id="toc-functions-for-querying-endpoints">functions for querying
 endpoints</a></li>
 </ul>
 </div>
 
 <div id="purpose" class="section level1">
 <h1>Purpose</h1>
-<div id="the-purpose-of-this-vignette-is-to-summarize-how-to-interact-with-pull-data-and-then-analyze-the-data-from-the-polygon.io-finacial-data-api-httpspolygon.io" class="section level5">
+<div id="the-purpose-of-this-vignette-is-to-summarize-how-to-interact-with-pull-data-and-then-analyze-the-data-from-the-pokemon-data-api-httpspokeapi.co" class="section level5">
 <h5>The purpose of this Vignette is to summarize how to interact with,
-pull data and then analyze the data from the polygon.io finacial data
-API <a href="https://polygon.io">https://polygon.io</a></h5>
+pull data and then analyze the data from the pokemon data API <a href="https://pokeapi.co/">https://pokeapi.co/</a></h5>
 </div>
 </div>
 <div id="required-packages" class="section level1">
@@ -1765,13 +1764,14 @@ API <a href="https://polygon.io">https://polygon.io</a></h5>
 </ul></li>
 <li><strong>ggplot2</strong>
 <ul>
-<li>This will be required to create the data visualizations</li>
+<li>This will be required to create the data visualizations (comes in
+tidyverse)</li>
 </ul></li>
 </ul>
 </div>
 </div>
-<div id="steps-for-querying-endpoints" class="section level1">
-<h1>Steps for querying endpoints</h1>
+<div id="functions-for-querying-endpoints" class="section level1">
+<h1>functions for querying endpoints</h1>
 <div id="step-0" class="section level4">
 <h4>Step 0</h4>
 <p>Make sure all of the required packages are installed using the
@@ -1782,9 +1782,27 @@ library(jsonlite)
 library(httr)
 library(ggplot2)</code></pre>
 </div>
-<div id="step-1" class="section level4">
-<h4>Step 1</h4>
-<pre class="r"><code>GET(https://api.polygon.io/v2/aggs/ticker/BA/range/1/day/2023-01-09/2023-01-09?adjusted=true&amp;sort=asc&amp;limit=120&amp;apiKey=DrI5M1TDWji8nJS9aZDfUAdR_6iqhFzm)</code></pre>
+<div id="contact-the-api" class="section level4">
+<h4>Contact the API</h4>
+<p>This is the general format that we will use to contact the api and
+retrieve data</p>
+<pre class="r"><code>## this is a functin to contact the API from a url 
+query &lt;- function(x){
+  
+  x&lt;- url of interest 
+  
+  
+ response &lt;-GET(x)
+ 
+ data &lt;- rawToChar(response$content)
+ 
+ jsondata &lt;- fromJSON(data)
+ 
+ tibbleresults &lt;- as_tibble(jsondata)
+ 
+ tibbleresults
+ 
+}</code></pre>
 </div>
 </div>
 

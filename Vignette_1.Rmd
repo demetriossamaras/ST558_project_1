@@ -15,12 +15,24 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE)
 
-##api key = DrI5M1TDWji8nJS9aZDfUAdR_6iqhFzm
+##polygon api key = DrI5M1TDWji8nJS9aZDfUAdR_6iqhFzm
+
+##omdb api key = bf40992d
+
+## pokemon api 
 ```
+
+```{r render, include=FALSE, eval=FALSE}
+
+rmarkdown::render(input = Vignette_1, output_format = github_document, output_file = "README.md", output_dir = top level folder? )
+
+
+```
+
 
 # Purpose 
 
-##### The purpose of this Vignette is to summarize how to interact with, pull data and then analyze the data from the polygon.io finacial data API [https://polygon.io](https://polygon.io)
+##### The purpose of this Vignette is to summarize how to interact with, pull data and then analyze the data from the pokemon data API [https://pokeapi.co/](https://pokeapi.co/). 
 
 # Required packages 
 
@@ -33,11 +45,11 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE)
   * **httr**
     + for the `GET` function 
   * **ggplot2**
-    + This will be required to create the data visualizations
+    + This will be required to create the data visualizations (comes in tidyverse)
     
-# Steps for querying endpoints  
+# functions for querying endpoints  
 
-#### Step 0 
+### Step 0 
 
 Make sure all of the required packages are installed using the `install.packages()` function and library them using `library()`
 
@@ -50,20 +62,98 @@ library(ggplot2)
 
 ```
 
-#### Step 1 Contact the API 
+
+## Contact the API 
+
+This is the general format that we will use to contact the api and retrieve data    
 
 ```{r contact , echo = TRUE, eval = FALSE}
-## this is a function to contact the API based on the ticker of interest
-ticker <- function(ticker){
+## this is a functin to contact the API from a url 
+query <- function(x){
+  ## will generate a url with the desired endpoint and inputed data 
+  url<- x 
   
-  link
-  
- response <-GET("https://api.polygon.io/v2/aggs/ticker/BA/range/1/day/2023-01-09/2023-01-09?adjusted=true&sort=asc&limit=120&apiKey=DrI5M1TDWji8nJS9aZDfUAdR_6iqhFzm")
-
-response
+ ## contact the api  and store the response  
+ response <-GET(x)
+ ## converts raw to charecter  
+ data <- rawToChar(response$content)
+ ## converts from json data
+ jsondata <- fromJSON(data)
+ ## organizes results of interest in a tibble and prints 
+ tibbleresults <- as_tibble(jsondata$ResultOfInterest)
+ 
+ tibbleresults
+ 
 }
   
 ```
+
+
+## Interacting with the "pokemon" endpoints. 
+
+#### `WhosThatPokemon` endpoint 1 
+
+This function will return a list of Pokemon and their ID number. As of writing there are 1008 Pokemon so by default it will return a tibble containing the names of all Pokemon in order. If you only wanted to see the first n number of Pokemon you would set n equal to that number. For example n=151 will return only the first 151 Pokemon. If you have a specific Pokemon in mind you can give the name or ID as pokemon="name" or pokemon=ID which will return a vector of the information available about that specific pokemon. If you know the information that you want on that pokemon you can set info equal to the info of interest. For example if want the weight set info="weight". 
+
+```{r pokemon endpoint, eval=TRUE, echo=TRUE}
+## https://pokeapi.co/api/v2/pokemon/ 
+
+WhosThatPokemon <- function(pokemon="all", n=1008, info=NULL){
+  ## if you want all Pokemon between 1 and your number of interest n
+  if(pokemon=="all"){
+  
+ n == n
+ ## creates the url to contact   
+ url <- paste0("https://pokeapi.co/api/v2/pokemon/", "?limit=", n )
+    
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+
+ data<- as_tibble(jsondata$results)
+ ## gets rid of the url column and adds a new column containing id numbers 
+ data1<- data %>% select(name) %>% mutate(ID=1:n)
+ 
+  }
+ ## this returns info on the specific Pokemon or ID number 
+  if(pokemon!= "all"&is.null(info)){
+ ## generates url containing pokemon name or id of interest   
+ url <- paste0("https://pokeapi.co/api/v2/pokemon/", pokemon, "/" ) 
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+ ## gives the available info on this Pokemon 
+ data1<- as_tibble(names(jsondata))
+ 
+  }
+  if(pokemon!="all"& !is.null(info)){
+  url <- paste0("https://pokeapi.co/api/v2/pokemon/", pokemon, "/" ) 
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)  
+ ## gives the desired info on this Pokemon 
+ data1 <- as_tibble(jsondata[info])
+  
+ 
+  }
+  data1
+}
+
+
+```
+
+
+## analysis 
+
+
 
 
 
