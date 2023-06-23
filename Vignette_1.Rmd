@@ -133,6 +133,8 @@ WhosThatPokemon <- function(pokemon="all", n=1008, info=NULL){
   }
   if(pokemon!="all"& !is.null(info)){
   url <- paste0("https://pokeapi.co/api/v2/pokemon/", pokemon, "/" ) 
+  
+  #"https://pokeapi.co/api/v2/pokemon/bulbasaur/
  
  response <-GET(url)
  
@@ -150,8 +152,29 @@ WhosThatPokemon <- function(pokemon="all", n=1008, info=NULL){
 
 ```
 
-```{r }
+#### This function will use our `WhosThatPokemon` function to pull whichever pokemon are desired. For example say you want 25 - 50, or a random sample of 30 pokemon and their heights. This function takes a vector of pokemon names or ID's. User can supply either a vector of ID's or a vector of names 
 
+```{r get a sample of pokemon }
+
+GiveMeThesePokemon <- function(pokemons, info=NULL){
+  #creates index of all pokemon 
+  index <- WhosThatPokemon()
+  if(is.numeric(pokemons))
+  index <- index[pokemons, ]
+  
+  
+  ThesePokemon <-sapply(X=pokemons, FUN = WhosThatPokemon, info = info)
+  ThesePokemon <- unlist(ThesePokemon)
+  
+  assign(eval(info), "value")
+  
+  p<- data.frame(name=index$name, ID=index$ID , value=ThesePokemon)
+  
+  names(p)[3] <- info
+
+  return(p)
+  
+}
 
 
 
@@ -206,6 +229,16 @@ g+geom_point(aes(color=type))
 
 
 ```
+
+```{r boxplot weights,  echo=TRUE, eval=TRUE}
+
+l <- ggplot(PokemonHeightsWeightsTypes, aes(x=weight))
+            
+ l + geom_boxplot() 
+
+
+```
+
 
 
 
