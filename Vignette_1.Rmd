@@ -15,11 +15,6 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE)
 
-##polygon api key = DrI5M1TDWji8nJS9aZDfUAdR_6iqhFzm
-
-##omdb api key = bf40992d
-
-## pokemon api 
 ```
 
 ```{r render, include=FALSE, eval=FALSE}
@@ -65,7 +60,7 @@ library(ggplot2)
 
 ## Contact the API 
 
-This is the general format that we will use to contact the api and retrieve data    
+This is the general format that we will use to contact the api and retrieve data (One thing to note is that the Pokemon API does not require a key, many other API's will require you specific key to be included at the end of the URL)    
 
 ```{r contact , echo = TRUE, eval = FALSE}
 ## this is a functin to contact the API from a url 
@@ -89,9 +84,9 @@ query <- function(x){
 ```
 
 
-## Interacting with the "pokemon" endpoints. 
+## Interacting with the Pokemon API endpoints. 
 
-#### `WhosThatPokemon` endpoint 1 
+### `WhosThatPokemon` endpoint 1 
 
 This function will return a list of Pokemon and their ID number. As of writing there are 1008 Pokemon so by default it will return a tibble containing the names of all Pokemon in order. If you only wanted to see the first n number of Pokemon you would set n equal to that number. For example n=151 will return only the first 151 Pokemon. If you have a specific Pokemon in mind you can give the name or ID as pokemon="name" or pokemon=ID which will return a vector of the information available about that specific pokemon. If you know the information that you want on that pokemon you can set info equal to the info of interest. For example if want the weight set info="weight". 
 
@@ -117,9 +112,9 @@ WhosThatPokemon <- function(pokemon="all", n=1008, info=NULL){
  data1<- data %>% select(name) %>% mutate(ID=1:n)
  
   }
- ## this returns info on the specific Pokemon or ID number 
+ ## this returns info available on the specific Pokemon or ID number 
   if(pokemon!= "all"&is.null(info)){
- ## generates url containing pokemon name or id of interest   
+ ## generates url containing Pokemon name or ID of interest   
  url <- paste0("https://pokeapi.co/api/v2/pokemon/", pokemon, "/" ) 
  
  response <-GET(url)
@@ -142,7 +137,7 @@ WhosThatPokemon <- function(pokemon="all", n=1008, info=NULL){
  
  jsondata <- fromJSON(data)  
  ## gives the desired info on this Pokemon 
- data1 <- jsondata[info]
+ data1 <- as_tibble(jsondata[info])
   
  
   }
@@ -152,30 +147,112 @@ WhosThatPokemon <- function(pokemon="all", n=1008, info=NULL){
 
 ```
 
-#### This function will use our `WhosThatPokemon` function to pull whichever pokemon are desired. For example say you want 25 - 50, or a random sample of 30 pokemon and their heights. This function takes a vector of pokemon names or ID's. User can supply either a vector of ID's or a vector of names 
+### `WhichBerry` endpoint 2 
+
+This function will return a list of berries and their ID number.  If you only wanted to see the first n number of berries you would set n equal to that number. For example n=10 will return only the first 10 berries. If you have a specific berry in mind you can give the name or ID as berry="name" or berry=ID which will return a vector of the information available about that specific berry. If you know the information that you want on that berry you can set info equal to the info of interest. For example if want the smoothness set info="smoothness".
+
+```{r berry endpoint, eval=TRUE, echo=TRUE}
+## https://pokeapi.co/api/v2/pokemon/ 
+
+WhichBerry <- function(berry="all", n=10, info=NULL){
+  ## if you want all berries between 1 and your number of interest n
+  if(berry=="all"){
+  
+ n == n
+ ## creates the url to contact   
+ url <- paste0("https://pokeapi.co/api/v2/berry/", "?limit=", n )
+    
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+
+ data<- as_tibble(jsondata$results)
+ ## gets rid of the url column and adds a new column containing id numbers 
+ data1<- data %>% select(name) %>% mutate(ID=1:n)
+ 
+  }
+ ## this returns info available on the specific Pokemon or ID number 
+  if(berry!= "all"&is.null(info)){
+ ## generates url containing Pokemon name or ID of interest   
+ url <- paste0("https://pokeapi.co/api/v2/berry/", berry, "/" ) 
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+ ## gives the available info on this Pokemon 
+ data1<- as_tibble(names(jsondata))
+ 
+  }
+  if(berry!="all"& !is.null(info)){
+  url <- paste0("https://pokeapi.co/api/v2/berry/", berry, "/" ) 
+  
+  #"https://pokeapi.co/api/v2/pokemon/bulbasaur/
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)  
+ ## gives the desired info on this Pokemon 
+ data1 <- as_tibble(jsondata[info])
+  
+ 
+  }
+  data1
+}
+
+
+```
+
+
+#### This function will use our `WhosThatPokemon` function to pull whichever pokemon are desired and return info on quantitative data (height, weight, base_experience). For example say you want 25 - 42, or a random sample of 30,  and their heights. This function takes a vector of pokemon names **or** a vector of ID's that are supplied by the user and info = "desired info".
 
 ```{r get a sample of pokemon }
 
 GiveMeThesePokemon <- function(pokemons, info=NULL){
-  #creates index of all pokemon 
+  
+  ## checks if the vector input is numeric 
+  if(is.numeric(pokemons)){
+  
+  ##creates index of all Pokemon 
   index <- WhosThatPokemon()
-  if(is.numeric(pokemons))
-  index <- index[pokemons, ]
   
+  ## adjusts the index to be the ID of interest   
+  index <- subset(index, ID %in% pokemons) 
   
+  ## applies the WhosThatPokemon function to ID's of interest 
   ThesePokemon <-sapply(X=pokemons, FUN = WhosThatPokemon, info = info)
   ThesePokemon <- unlist(ThesePokemon)
   
-  assign(eval(info), "value")
-  
-  p<- data.frame(name=index$name, ID=index$ID , value=ThesePokemon)
-  
+  ## creates a data frame with names 
+  p<- data.frame(name=index$name, ID=index$ID , info=ThesePokemon)
+  ## sets the name of the column with desired info to the info requested 
   names(p)[3] <- info
-
-  return(p)
   
-}
+  return(as_tibble(p))
+  }
+else{
+  index <- WhosThatPokemon() 
+  ## adjusts the index to be name of interest   
+  index <- subset(index, name %in% pokemons)
 
+  ## applies the whos that pokemon function to ID's of interest 
+  ThesePokemon <-sapply(X=pokemons, FUN = WhosThatPokemon, info = info)
+  ThesePokemon <- unlist(ThesePokemon)
+  
+  ## creates a data frame with names 
+  p<- data.frame(name=index$name, ID=index$ID , info=ThesePokemon, row.names = NULL)
+  ## sets the name of the column with desired info to the info requested 
+  names(p)[3] <- info
+  
+  return(as_tibble(p))
+
+ }
+}
 
 
 ```
