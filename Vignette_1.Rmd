@@ -60,7 +60,7 @@ library(ggplot2)
 
 ## Contact the API 
 
-This is the general format that we will use to contact the api and retrieve data (One thing to note is that the Pokemon API does not require a key, many other API's will require you specific key to be included at the end of the URL)    
+This is the general format that we will use to contact the api and retrieve data (One thing to note is that the Pokemon API does not require a key, many other API's will require you to use ypur specific key included at the end of the URL)    
 
 ```{r contact , echo = TRUE, eval = FALSE}
 ## this is a functin to contact the API from a url 
@@ -88,7 +88,7 @@ query <- function(x){
 
 ### `WhosThatPokemon` endpoint 1 
 
-This function will return a list of Pokemon and their ID number. As of writing there are 1008 Pokemon so by default it will return a tibble containing the names of all Pokemon in order. If you only wanted to see the first n number of Pokemon you would set n equal to that number. For example n=151 will return only the first 151 Pokemon. If you have a specific Pokemon in mind you can give the name or ID as pokemon="name" or pokemon=ID which will return a vector of the information available about that specific pokemon. If you know the information that you want on that pokemon you can set info equal to the info of interest. For example if want the weight set info="weight". 
+This function will return a list of Pokemon and their ID number. As of writing there are 1008 Pokemon so by default it will return a tibble containing the names of all Pokemon in order. If you only wanted to see the first n number of Pokemon you would set n equal to that number. For example n=151 will return only the first 151 Pokemon. If you have a specific Pokemon in mind you can give the name or ID as pokemon="name" or pokemon=ID which will return a the information available about that specific pokemon. If you know the information that you want on that pokemon you can set info equal to the info of interest. For example if want the weight set info="weight". 
 
 ```{r pokemon endpoint, eval=TRUE, echo=TRUE}
 ## https://pokeapi.co/api/v2/pokemon/ 
@@ -137,7 +137,7 @@ WhosThatPokemon <- function(pokemon="all", n=1008, info=NULL){
  
  jsondata <- fromJSON(data)  
  ## gives the desired info on this Pokemon 
- data1 <- as_tibble(jsondata[info])
+ data1 <- as_tibble(jsondata[[info]])
   
  
   }
@@ -149,7 +149,7 @@ WhosThatPokemon <- function(pokemon="all", n=1008, info=NULL){
 
 ### `WhichBerry` endpoint 2 
 
-This function will return a list of berries and their ID number.  If you only wanted to see the first n number of berries you would set n equal to that number. For example n=10 will return only the first 10 berries. If you have a specific berry in mind you can give the name or ID as berry="name" or berry=ID which will return a vector of the information available about that specific berry. If you know the information that you want on that berry you can set info equal to the info of interest. For example if want the smoothness set info="smoothness".
+This function will return a list of berries and their ID number.  If you only wanted to see the first n number of berries you would set n equal to that number. For example n=10 will return only the first 10 berries. If you have a specific berry in mind you can give the name or ID as berry="name" or berry=ID which will return a the information available about that specific berry. If you know the information that you want on that berry you can set info equal to the info of interest. For example if want the smoothness set info="smoothness".
 
 ```{r berry endpoint, eval=TRUE, echo=TRUE}
 ## https://pokeapi.co/api/v2/pokemon/ 
@@ -198,7 +198,129 @@ WhichBerry <- function(berry="all", n=10, info=NULL){
  
  jsondata <- fromJSON(data)  
  ## gives the desired info on this Pokemon 
- data1 <- as_tibble(jsondata[info])
+ data1 <- as_tibble(jsondata[[info]])
+  
+ 
+  }
+  data1
+}
+
+
+```
+
+### `WhatGeneration` endpoint 3 
+
+This function will return a list of generations and their ID number.  If you only wanted to see the first n number of generations you would set n equal to that number. For example n=9 will return all 9 generations. If you have a specific generation in mind you can give the name or ID as gen="name" or gen=ID which will return the information available about that specific generation. If you know the information that you want on that generation you can set info equal to the info of interest. For example if want the types of pokemon in that generations set info="types".
+
+```{r generation endpoint, eval=TRUE, echo=TRUE}
+## https://pokeapi.co/api/v2/pokemon/ 
+
+WhatGeneration <- function(gen="all", n=9, info=NULL){
+  ## if you want all between 1 and your number of interest n
+  if(gen=="all"){
+  
+ n == n
+ ## creates the url to contact   
+ url <- paste0("https://pokeapi.co/api/v2/generation/", "?limit=", n )
+    
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+
+ data<- as_tibble(jsondata$results)
+ ## gets rid of the url column and adds a new column containing id numbers 
+ data1<- data %>% select(name) %>% mutate(ID=1:n)
+ 
+  }
+ ## this returns info available on the specific Pokemon or ID number 
+  if(gen!= "all"&is.null(info)){
+ ## generates url containing Pokemon name or ID of interest   
+ url <- paste0("https://pokeapi.co/api/v2/generation/", gen, "/" ) 
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+ ## gives the available info on this Pokemon 
+ data1<- as_tibble(names(jsondata))
+ 
+  }
+  if(gen!="all"& !is.null(info)){
+  url <- paste0("https://pokeapi.co/api/v2/generation/", gen, "/" ) 
+  
+  #"https://pokeapi.co/api/v2/pokemon/bulbasaur/
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)  
+ ## gives the desired info on this Pokemon 
+ data1 <- as_tibble(jsondata[[info]])
+  
+ 
+  }
+  data1
+}
+
+
+```
+
+### `ContestTypes` endpoint 4 
+
+This function will return a list of contest types and their ID number.  If you only wanted to see the first n number of contest types you would set n equal to that number. For example n=5 will return all contest types. If you have a specific contest in mind you can give the name or ID as con="name" or con=ID which will return the information available about that specific contest type. If you know the information that you want on that contest type you can set info equal to the info of interest. For example if want the berry flavor that correlates with this contest type set info="berry_flavor".
+
+```{r contest-type endpoint, eval=TRUE, echo=TRUE}
+## https://pokeapi.co/api/v2/pokemon/ 
+
+ContestTypes <- function(con="all", n=5, info=NULL){
+  ## if you want all  between 1 and your number of interest n
+  if(con=="all"){
+  
+ n == n
+ ## creates the url to contact   
+ url <- paste0("https://pokeapi.co/api/v2/contest-type/", "?limit=", n )
+    
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+
+ data<- as_tibble(jsondata$results)
+ ## gets rid of the url column and adds a new column containing id numbers 
+ data1<- data %>% select(name) %>% mutate(ID=1:n)
+ 
+  }
+ ## this returns info available on the specific Pokemon or ID number 
+  if(con!= "all"&is.null(info)){
+ ## generates url containing Pokemon name or ID of interest   
+ url <- paste0("https://pokeapi.co/api/v2/contest-type/", con, "/" ) 
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+ ## gives the available info on this Pokemon 
+ data1<- as_tibble(names(jsondata))
+ 
+  }
+  if(con!="all"& !is.null(info)){
+  url <- paste0("https://pokeapi.co/api/v2/contest-type/", con, "/" ) 
+  
+  #"https://pokeapi.co/api/v2/pokemon/bulbasaur/
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)  
+ ## gives the desired info on this Pokemon 
+ data1 <- as_tibble(jsondata[[info]])
   
  
   }
@@ -209,9 +331,135 @@ WhichBerry <- function(berry="all", n=10, info=NULL){
 ```
 
 
-#### This function will use our `WhosThatPokemon` function to pull whichever pokemon are desired and return info on quantitative data (height, weight, base_experience). For example say you want 25 - 42, or a random sample of 30,  and their heights. This function takes a vector of pokemon names **or** a vector of ID's that are supplied by the user and info = "desired info".
+### `GotItem` endpoint 5
 
-```{r get a sample of pokemon }
+This function will return a list of items and their ID number.  If you only wanted to see the first n number of items you would set n equal to that number. For example n=10 will return only the first 10 items. If you have a specific item in mind you can give the name or ID as item="name" or item=ID which will return the information available about that specific item. If you know the information that you want on that item you can set info equal to the info of interest. For example if want the cost set info="cost".
+
+```{r item endpoint, eval=TRUE, echo=TRUE}
+## https://pokeapi.co/api/v2/pokemon/ 
+
+GotItem <- function(item="all", n=510, info=NULL){
+  ## if you want all between 1 and your number of interest n
+  if(item=="all"){
+  
+ n == n
+ ## creates the url to contact   
+ url <- paste0("https://pokeapi.co/api/v2/item/", "?limit=", n )
+    
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+
+ data<- as_tibble(jsondata$results)
+ ## gets rid of the url column and adds a new column containing id numbers 
+ data1<- data %>% select(name) %>% mutate(ID=1:n)
+ 
+  }
+ ## this returns info available on the specific Pokemon or ID number 
+  if(item!= "all"&is.null(info)){
+ ## generates url containing Pokemon name or ID of interest   
+ url <- paste0("https://pokeapi.co/api/v2/item/", item, "/" ) 
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+ ## gives the available info on this Pokemon 
+ data1<- as_tibble(names(jsondata))
+ 
+  }
+  if(item!="all"& !is.null(info)){
+  url <- paste0("https://pokeapi.co/api/v2/item/", item, "/" ) 
+  
+  #"https://pokeapi.co/api/v2/pokemon/bulbasaur/
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)  
+ ## gives the desired info on this Pokemon 
+ data1 <- as_tibble(jsondata[[info]])
+  
+ 
+  }
+  data1
+}
+
+
+```
+
+
+### `WhereAmI` endpoint 6
+
+This function will return a list of locations and their ID number.  If you only wanted to see the first n number of locations you would set n equal to that number. For example n=10 will return only the first 10 locations. If you have a specific location in mind you can give the name or ID as loc="name" or loc=ID which will return a the information available about that specific location. If you know the information that you want on that location you can set info equal to the info of interest. For example if want the region set info="region".
+
+```{r location endpoint, eval=TRUE, echo=TRUE}
+## https://pokeapi.co/api/v2/pokemon/ 
+
+WhereAmI <- function(loc="all", n=50, info=NULL){
+  ## if you want all between 1 and your number of interest n
+  if(loc=="all"){
+  
+ n == n
+ ## creates the url to contact   
+ url <- paste0("https://pokeapi.co/api/v2/location/", "?limit=", n )
+    
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+
+ data<- as_tibble(jsondata$results)
+ ## gets rid of the url column and adds a new column containing id numbers 
+ data1<- data %>% select(name) %>% mutate(ID=1:n)
+ 
+  }
+ ## this returns info available on the specific Pokemon or ID number 
+  if(loc!= "all"&is.null(info)){
+ ## generates url containing Pokemon name or ID of interest   
+ url <- paste0("https://pokeapi.co/api/v2/location/", loc, "/" ) 
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)
+ ## gives the available info on this Pokemon 
+ data1<- as_tibble(names(jsondata))
+ 
+  }
+  if(loc!="all"& !is.null(info)){
+  url <- paste0("https://pokeapi.co/api/v2/location/", loc, "/" ) 
+  
+  #"https://pokeapi.co/api/v2/pokemon/bulbasaur/
+ 
+ response <-GET(url)
+ 
+ data <- rawToChar(response$content)
+ 
+ jsondata <- fromJSON(data)  
+ ## gives the desired info on this Pokemon 
+ data1 <- as_tibble(jsondata[[info]])
+  
+ 
+  }
+  data1
+}
+
+
+```
+
+
+
+
+### This function will use our `WhosThatPokemon` function to pull whichever pokemon are desired and return info quantitative info with a single value (height, weight, base_experience) to help with our EDA. For example say you want ID 25 - 42, or a random sample pokemon, and their heights. This function takes a vector of  names **or** a vector of ID's that are supplied by the user and info = "desired info".
+
+```{r get a sample of pokemon, eval=TRUE, echo=TRUE}
 
 GiveMeThesePokemon <- function(pokemons, info=NULL){
   
@@ -258,15 +506,14 @@ else{
 ```
 
 
+## EDA 
 
-## EDA analysis 
 
-#### We are going to use the fuctions that we createed to get the heights and weights the pokemon and look at the relationship 
+### We are going to use the fuctions that we createed to get the heights and weights the pokemon and look at the relationship.  
 
-```{r heights weights types  }
+```{r heights weights types, eval=TRUE, echo=TRUE, cache=TRUE}
 ## sets the tibble of first 10 pokemon as a global object 
 test10<- WhosThatPokemon(n=10)
-
 
 ## contacts the api to get the heights for the first 10 pokemon
 TenPokeHeights <- sapply(X=test10$name, FUN = WhosThatPokemon, info = "height")
