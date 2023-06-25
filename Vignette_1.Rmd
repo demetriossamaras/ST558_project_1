@@ -358,7 +358,7 @@ GotItem <- function(item="all", n=2050, info=NULL){
   ## if you want all between 1 and your number of interest n
   if(n>2050){
     ## kicks out the user if n is larger than what is available from the api
-    stop("There are only 2050 items")
+   stop("There are only 2050 items")
   }
   if(item=="all"){
   
@@ -483,7 +483,7 @@ WhereAmI <- function(loc="all", n=850, info=NULL){
 
 ### `GiveMeThisInfo` 
 
-This function will use our 6 endpoint functions to pull info from whichever endpoint is desired by setting fun=desired function to help with our EDA. For example say you want costs for items ID 25 - 42 or a random sample of pokemon and their heights. This function takes a vector of names **or** a vector of ID's that are supplied by the user and info = "desired info". The desired info must return a single value, for example height, weight, size, cost, etc. 
+This function will use our 6 endpoint functions to pull info from whichever endpoint is desired by setting fun=desired function to help with our EDA. For example say you want costs for items ID 25 - 42 or a random sample of pokemon and their heights. This function takes a vector of names **or** a vector of ID's that are supplied by the user and info = "desired info". The desired info must be an integer, for example height, weight, size, cost, etc. 
 
 
 ```{r get a sample of anything, eval=TRUE, echo=TRUE}
@@ -533,12 +533,53 @@ else{
 ```
 
 
-## EDA 
+# EDA 
+
+### Berry sizes  
+
+Here we will look at the size distribution of all berries 
+
+```{r Berries, eval=TRUE, echo=TRUE, cache=TRUE}
+
+## grabs all the berries
+Berries <- GiveMeThisInfo(fun = WhichBerry, vec = 1:64, info = "size")
+
+Berries 
+```
+
+Here we will categorize the berries into size and look at how many fall into each group. We can see that the largest group of berries fall into the small size category, none are tiny and a similar amount fall into medium and large. 
+
+```{r size counts}
+
+## categorizes the berries based on size 
+ BerrySize<- ifelse(Berries$size >= 200, "large",
+      ifelse(Berries$size >= 100, "medium",
+        ifelse(Berries$size >= 10, "small", "tiny")))
+## makes a contigency table of the size categories
+table(BerrySize)
+
+```
 
 
-### We are going to use the fuctions that we createed to figure out how many pokemon are in generation 1 and get the heights and weights and types of all of the pokemon in generation 1 to look at the relationship.  
+looking at the frequency histogram We can see that berry size does not seem to be symmetrically distributed and has a long right tail.  
 
-```{r heights weights types, eval=TRUE, echo=TRUE}
+```{r histogram, eval=TRUE, echo=TRUE}
+## estimates a decent binwidth
+bw <- 2 * IQR(Berries$size) / length(Berries$size)^(1/3)
+##sets plotting object 
+h <- ggplot(Berries, aes(x=size))
+## makes histogram
+h+geom_histogram(binwidth = bw, color="red", fill="blue") + labs(x="Size(mm)") + ggtitle("Berry size frequency")
+```
+
+
+
+### Pokemon heights, weights and types 
+
+
+We are going to use the functions that we created to figure out how many pokemon are in generation 1 and get the heights and weights and types of all of the pokemon in generation 1 to look at the relationship.  
+
+```{r heights weights types, eval=TRUE, echo=TRUE, cache=TRUE}
 ## gives us a count of all the pokemon in the first generation
 gen1<- WhatGeneration(gen=1, info="pokemon_species") %>% nrow()
 
@@ -548,7 +589,7 @@ Gen1PokeHeights <- GiveMeThisInfo(fun = WhosThatPokemon, vec=1:gen1, info = "hei
 ## contacts the api to get the weights for the first generation of pokemon
 Gen1PokeWeights <- GiveMeThisInfo(fun = WhosThatPokemon, vec =1:gen1, info = "weight")
 
-## contacts the api to get the types for the first generation pokemon 
+## types returns more that one result so we will use sapply to get types 
 Gen1PokeTypes <- sapply(X=c(1:gen1), FUN = WhosThatPokemon, info = "types")
 
 ## pulls the primary type out for each pokemon 
@@ -567,27 +608,59 @@ Gen1PokeHWT <- cbind(Gen1PokeHeights, select(Gen1PokeWeights, "weight"), select(
 ```
 
 
+Here we can look at the relationship between the heights and the weights of Pokemon based on there types. We can see that in general as weights increase so do heights but there are some extreme examples of both that dont follow the trend line. The doesnt seem to be an obvious relationship between type and either size or weight.
+
 ```{r heights vs weights scatter, echo=TRUE, eval=TRUE}
+## sets the plotting object as Gen1PokeHWT
+s <- ggplot(Gen1PokeHWT, aes(x=height, y=weight))
+## adds scatter and line 
+s+geom_point(aes(color=type)) + geom_smooth(method = lm) +labs(y= "Height (dm)", x="Weight(hg)")+ggtitle("Height and Weight by type")
 
-g <- ggplot(Gen1PokeHWT, aes(x=height, y=weight))
 
-g+geom_point(aes(color=type))
+
+
+```
+
+This is a contingency table of the number of each type of Pokemon followed by a bar plot of that count, we can see that water is the most common type followed by normal. Ice and fairy are the least common types  
+
+```{r contigency table type, eval=TRUE, echo=TRUE}
+## generates contingency table of type count 
+TypeFeq <- table(Gen1PokeHWT$type)
+
+TypeFeq
+
+f <- ggplot(data = Gen1PokeHWT, aes(y=type, fill=type))
+
+f + geom_bar(stat = "count", ) + ggtitle("Count of each type")
+
+
+```
+
+
+### Pokemon Linear density
+
+Here we will create a new variable from two of our variables height and weight. We will take weight/height and treat it as linear density and look at the average density for each setting of our categorical variable type.  
+
+```{r density, echo=TRUE, eval=TRUE}
+
+## creates new column density that is weight/height 
+Gen1PokeHWT$density<- (Gen1PokeHWT$weight/Gen1PokeHWT$height)
 
 
 
 ```
 
-```{r boxplot weights,  echo=TRUE, eval=TRUE}
 
-l <- ggplot(PokemonHeightsWeightsTypes, aes(x=weight))
-            
- l + geom_boxplot() 
+by creating a box plot of densities for each type we can see that for some types the density is fairly symmetrical, whereas for others it is highly skewed, like for type=dragon.   
+
+```{r boxplot density,  echo=TRUE, eval=TRUE}
+## creates a plotting object with density vs type
+b <- ggplot(Gen1PokeHWT, aes(y=type, x=density, color=type))
+## creats a set of boxplots of density vs type            
+b + geom_boxplot(show.legend = FALSE) + labs(x="Linear density (hg/dm)")+ggtitle("Density by type")
 
 
 ```
-
-
-
 
 
 
