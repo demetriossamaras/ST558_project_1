@@ -42,7 +42,7 @@ rmarkdown::render(input = Vignette_1, output_format = github_document, output_fi
   * **ggplot2**
     + This will be required to create the data visualizations (comes in tidyverse)
     
-# functions for querying endpoints  
+# Functions for querying endpoints  
 
 ### Step 0 
 
@@ -60,7 +60,7 @@ library(ggplot2)
 
 ## Contact the API 
 
-This is the general format that we will use to contact the api and retrieve data (One thing to note is that the Pokemon API does not require a key, many other API's will require you to use ypur specific key included at the end of the URL)    
+This is the general format that we will use to contact the api and retrieve data (One thing to note is that the Pokemon API does not require a key, many other API's will require you to use your specific key included at the end of the URL)    
 
 ```{r contact , echo = TRUE, eval = FALSE}
 ## this is a functin to contact the API from a url 
@@ -88,7 +88,7 @@ query <- function(x){
 
 ### Pokemon `WhosThatPokemon` endpoint 1 
 
-This function will return a list of Pokemon and their ID number. As of writing there are 1008 Pokemon so by default it will return a tibble containing the names of all Pokemon in order. If you only wanted to see the first n number of Pokemon you would set n equal to that number. For example n=151 will return only the first 151 Pokemon. If you have a specific Pokemon in mind you can give the name or ID as pokemon="name" or pokemon=ID which will return a the information available about that specific pokemon. If you know the information that you want on that pokemon you can set info equal to the info of interest. For example if want the weight set info="weight". 
+This function will return a list of Pokemon and their ID number. As of writing there are 1281 Pokemon so by default it will return a tibble containing the names of all Pokemon in order. If you only wanted to see the first n number of Pokemon you would set n equal to that number. For example n=151 will return only the first 151 Pokemon. If you have a specific Pokemon in mind you can give the name or ID as pokemon="name" or pokemon=ID which will return a the information available about that specific pokemon. If you know the information that you want on that pokemon you can set info equal to the info of interest. For example if want the weight set info="weight". 
 
 ```{r pokemon endpoint, eval=TRUE, echo=TRUE}
 ## https://pokeapi.co/api/v2/pokemon/ 
@@ -153,7 +153,7 @@ WhosThatPokemon <- function(pokemon="all", n=1281, info=NULL){
 
 ### Berry `WhichBerry` endpoint 2 
 
-This function will return a list of berries and their ID number.  If you only wanted to see the first n number of berries you would set n equal to that number. For example n=10 will return only the first 10 berries. If you have a specific berry in mind you can give the name or ID as berry="name" or berry=ID which will return a the information available about that specific berry. If you know the information that you want on that berry you can set info equal to the info of interest. For example if want the smoothness set info="smoothness".
+This function will return a list of berries and their ID number. If you only wanted to see the first n number of berries you would set n equal to that number. For example n=10 will return only the first 10 berries. If you have a specific berry in mind you can give the name or ID as berry="name" or berry=ID which will return a the information available about that specific berry. If you know the information that you want on that berry you can set info equal to the info of interest. For example if want the smoothness set info="smoothness".
 
 ```{r berry endpoint, eval=TRUE, echo=TRUE}
 
@@ -483,7 +483,7 @@ WhereAmI <- function(loc="all", n=850, info=NULL){
 
 ### `GiveMeThisInfo` 
 
-This function will use our 6 endpoint functions to pull info from whichever endpoint is desired by setting fun=desired function to help with our EDA. For example say you want costs for items ID 25 - 42 or a random sample of pokemon and their heights. This function takes a vector of names **or** a vector of ID's that are supplied by the user and info = "desired info". The desired info must be an integer, for example height, weight, size, cost, etc. 
+This function will use our 6 endpoint functions to pull info from whichever endpoint is desired by setting fun=desired function to help with our EDA. For example say you want costs for items ID 25 - 42 or a random sample of pokemon and their heights. This function takes a vector of names **or** a vector of ID's that are supplied by the user and info = "desired info". The desired info must return a single integer, for example height, weight, size, cost, etc. 
 
 
 ```{r get a sample of anything, eval=TRUE, echo=TRUE}
@@ -499,7 +499,7 @@ GiveMeThisInfo <- function(fun = WhosThatPokemon, vec, info=NULL){
   ## adjusts the index to be the ID of interest   
   index <- subset(index, ID %in% vec) 
   
-  ## applies the WhosThatPokemon function to ID's of interest 
+  ## applies the function to ID's of interest 
   ThesePokemon <-sapply(X=vec, FUN = fun, info = info)
   ThesePokemon <- unlist(ThesePokemon)
   
@@ -515,7 +515,7 @@ else{
   ## adjusts the index to be name of interest   
   index <- subset(index, name %in% vec)
 
-  ## applies the whos that pokemon function to ID's of interest 
+  ## applies the  function to names of interest 
   ThesePokemon <-sapply(X=vec, FUN = fun, info = info)
   ThesePokemon <- unlist(ThesePokemon)
   
@@ -537,7 +537,7 @@ else{
 
 ### Berry sizes  
 
-Here we will look at the size distribution of all berries 
+Here we will look at the size distribution of all berries using the functions we created. This will return a tibble that has all 64 berries and their sizes. 
 
 ```{r Berries, eval=TRUE, echo=TRUE, cache=TRUE}
 
@@ -547,7 +547,7 @@ Berries <- GiveMeThisInfo(fun = WhichBerry, vec = 1:64, info = "size")
 Berries 
 ```
 
-Here we will categorize the berries into size and look at how many fall into each group. We can see that the largest group of berries fall into the small size category, none are tiny and a similar amount fall into medium and large. 
+Here we will categorize the berries into size and look at how many fall into each group. We can see that the largest number of berries fall into the small size category, none are tiny and a similar amount fall into medium and large. 
 
 ```{r size counts}
 
@@ -561,7 +561,7 @@ table(BerrySize)
 ```
 
 
-looking at the frequency histogram We can see that berry size does not seem to be symmetrically distributed and has a long right tail.  
+Looking at the frequency histogram We can see that berry size does not seem to be symmetrically distributed and has a long right tail.  
 
 ```{r histogram, eval=TRUE, echo=TRUE}
 ## estimates a decent binwidth
@@ -589,7 +589,7 @@ Gen1PokeHeights <- GiveMeThisInfo(fun = WhosThatPokemon, vec=1:gen1, info = "hei
 ## contacts the api to get the weights for the first generation of pokemon
 Gen1PokeWeights <- GiveMeThisInfo(fun = WhosThatPokemon, vec =1:gen1, info = "weight")
 
-## types returns more that one result so we will use sapply to get types 
+## types does not return a single integer so we will use sapply to get types 
 Gen1PokeTypes <- sapply(X=c(1:gen1), FUN = WhosThatPokemon, info = "types")
 
 ## pulls the primary type out for each pokemon 
@@ -598,28 +598,55 @@ Gen1PokeTypes <- sapply(1:gen1, FUN = function(i){ Gen1PokeTypes[[i]][[2]][1,1]}
 ## takes primary type as a tiblle
 Gen1PokeTypes<- Gen1PokeTypes%>% as_tibble()
 
-## renames colum
+## renames column
 names(Gen1PokeTypes) <- "type"
 
-## binds the column of heights, weights, and types togetheer
+## binds the column of heights, weights, and types together
 
 Gen1PokeHWT <- cbind(Gen1PokeHeights, select(Gen1PokeWeights, "weight"), select(Gen1PokeTypes, "type"))
 
+Gen1PokeHWT
+
 ```
 
 
-Here we can look at the relationship between the heights and the weights of Pokemon based on there types. We can see that in general as weights increase so do heights but there are some extreme examples of both that dont follow the trend line. The doesnt seem to be an obvious relationship between type and either size or weight.
+In the following histograms we can see that the distribution of the heights and weights are both centered at the lower end with long right tails. This suggests that while most pokemon are similar sizes there are some that are incredibly tall and heavy. 
+
+```{r height distribution, echo=TRUE, eval=TRUE}
+
+n <- ggplot(Gen1PokeHWT, aes(x=height))
+
+n+ geom_histogram(color="red", fill="blue")+labs(x="Height(dm)")+ggtitle("Gen 1 height distribution")
+
+
+
+```
+
+```{r weight distribution, echo=TRUE, eval=TRUE}
+
+n <- ggplot(Gen1PokeHWT, aes(x=weight))
+
+n+ geom_histogram(color="grey", fill="gold")+labs(x="weight(hg)")+ggtitle("Gen 1 weight distribution")
+
+```
+
+
+Here we can look at the relationship between the heights and the weights of Pokemon based on there types. There is some correlation between heights and weights, we can see that in general as weights increase so do heights but there are some extreme examples of both that don't follow the trend line. There doesn't seem to be an obvious relationship between type and either size or weight based on this plot. 
 
 ```{r heights vs weights scatter, echo=TRUE, eval=TRUE}
+## correlation between height and weight 
+correlation <- cor(Gen1PokeHWT$height, Gen1PokeHWT$weight)
 ## sets the plotting object as Gen1PokeHWT
 s <- ggplot(Gen1PokeHWT, aes(x=height, y=weight))
 ## adds scatter and line 
-s+geom_point(aes(color=type)) + geom_smooth(method = lm) +labs(y= "Height (dm)", x="Weight(hg)")+ggtitle("Height and Weight by type")
+s+geom_point(aes(color=type)) + geom_smooth(method = lm) +labs(y= "Height (dm)", x="Weight(hg)")+ggtitle("Height and Weight by type") + geom_text( x=75, y=500, size = 5, label = paste0("Correlation = ",
+round(correlation, 2)))
 
 
 
 
 ```
+
 
 This is a contingency table of the number of each type of Pokemon followed by a bar plot of that count, we can see that water is the most common type followed by normal. Ice and fairy are the least common types  
 
@@ -646,7 +673,7 @@ Here we will create a new variable from two of our variables height and weight. 
 ## creates new column density that is weight/height 
 Gen1PokeHWT$density<- (Gen1PokeHWT$weight/Gen1PokeHWT$height)
 
-
+Gen1PokeHWT
 
 ```
 
@@ -662,6 +689,9 @@ b + geom_boxplot(show.legend = FALSE) + labs(x="Linear density (hg/dm)")+ggtitle
 
 ```
 
+# Conclusion 
+
+To summarize this vignette, we were able to create a number of functions that allow the user to query a number of endpoints and extract desired information into a form that allows for easy understanding and analysis. We also used these functions to do a basic data analysis to check the functionality and to look at some interesting data.  
 
 
 
