@@ -5,22 +5,11 @@ date: "2023-06-16"
 output:
    github_document:
     toc: TRUE
-    toc_depth: 3
-    toc_float: FALSE
-    code_folding: hide
-    theme: readable
-    df_print: paged
+    html_preview: False
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE)
-
-```
-
-```{r render, include=FALSE, eval=FALSE}
-
-rmarkdown::render(input = Vignette_1, output_format = github_document, output_file = "README.md", output_dir = top level folder? )
-
 
 ```
 
